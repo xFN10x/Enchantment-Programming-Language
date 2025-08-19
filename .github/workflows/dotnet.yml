@@ -44,6 +44,10 @@ jobs:
         main-repo: true
         # Whether to apply repository-specific modifications to 404.html as well. This only takes effect when main-repo is false.
         fix-404: true
+    - uses: actions/upload-artifact@v4
+      with:
+        name: github-pages
+        path: _out
 
   deploy:
     environment:
