@@ -28,7 +28,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet publish EnchantmentProgrammingLanguage.csproj -c Release -o _out /p:PublishTrimmed=true
     - name: Test
       run: dotnet test --no-build --verbosity normal
     - name: GitHub Pages Blazor WASM
