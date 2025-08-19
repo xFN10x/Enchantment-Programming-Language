@@ -1,5 +1,12 @@
+﻿@font-face {
+    font-family: 'Minecraft';
+    src: url('/font/Minecraft.otf');
+    //src: local('☺'), url('/font/Minecraft.otf.woff') format('woff'), url('/font/Minecraft.otf.ttf') format('truetype');
+}
+
 html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: Minecraft;
+    
 }
 
 h1:focus {
