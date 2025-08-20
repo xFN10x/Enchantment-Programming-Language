@@ -1,58 +1,49 @@
-# This workflow will build a .NET project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
-
-name: .NET
+name: Deploy GitHub Pages
 
 on:
+  # Runs on pushes targeting the default branch
   push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+    branches: [ "main" ]
 
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
-  id-token: write
-  pages: write
   contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
+  # Build job
   build:
-
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
-    - name: Restore dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet publish EnchantmentProgrammingLanguage.csproj -c Release -o _out /p:PublishTrimmed=true
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
-    - name: GitHub Pages Blazor WASM
-    # You may pin to the exact commit or the version.
-    # uses: na1307/blazor-github-pages@da07d46d47ad5038f3caf9a3ba5a4a5cdad5f49b
-      uses: na1307/blazor-github-pages@v3.0
-      with:
-        # Path of project (.csproj)
-        project-path: EnchantmentProgrammingLanguage.csproj
-        # Path to output in Publish step
-        publish-path: _out
-        # Set to true only when running this action from the default GitHub Pages repository ({ID}.github.io).
-        main-repo: true
-        # Whether to apply repository-specific modifications to 404.html as well. This only takes effect when main-repo is false.
-        fix-404: true
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+      - name: Prepare Blazor WASM for GitHub Pages
+        uses: na1307/blazor-github-pages@v3
+        id: prepare
+        with:
+          project-path: EnchantmentProgrammingLanguage.csproj
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ steps.prepare.outputs.wwwroot-path }}
 
-    - name: Remove symlinks
-      run: find _out -type l -delete
-  
-    - uses: actions/upload-artifact@v4
-      with:
-        name: github-pages
-        path: _out/wwwroot
-
+  # Deployment job
   deploy:
     environment:
       name: github-pages
@@ -60,8 +51,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-          
