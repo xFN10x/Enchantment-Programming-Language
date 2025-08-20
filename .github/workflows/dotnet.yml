@@ -9,6 +9,11 @@ on:
   pull_request:
     branches: [ "master" ]
 
+permissions:
+  id-token: write
+  pages: write
+  contents: read
+
 jobs:
   build:
 
@@ -23,7 +28,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet publish EnchantmentProgrammingLanguage.csproj -c Release -o _out /p:PublishTrimmed=true
     - name: Test
       run: dotnet test --no-build --verbosity normal
     - name: GitHub Pages Blazor WASM
@@ -39,15 +44,15 @@ jobs:
         main-repo: true
         # Whether to apply repository-specific modifications to 404.html as well. This only takes effect when main-repo is false.
         fix-404: true
-    - name: GitHub Pages
-  # You may pin to the exact commit or the version.
-  # uses: crazy-max/ghaction-github-pages@df5cc2bfa78282ded844b354faee141f06b41865
-      uses: crazy-max/ghaction-github-pages@v4.2.0
+
+    - name: Remove symlinks
+      run: find _out -type l -delete
+  
+    - uses: actions/upload-artifact@v4
       with:
-        # Git branch where assets will be deployed
-        target_branch: main
-        # Build directory to deploy
-        build_dir: _out
+        name: github-pages
+        path: _out/wwwroot
+
   deploy:
     environment:
       name: github-pages
@@ -55,6 +60,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
+      
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
